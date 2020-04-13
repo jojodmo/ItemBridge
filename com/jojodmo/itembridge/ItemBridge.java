@@ -167,7 +167,6 @@ public class ItemBridge{
     }
 
     public static ItemStack getItemStack(String key, String item, Map<String, Object> parameters){
-        System.out.println("GIS " + key + " : " + item);
         if(key == null){
             return Main.getMinecraftBridge().fetchItemStack(item);
         }
