@@ -20,8 +20,23 @@ public class MinecraftItemBridge implements ItemBridgeListener{
     }
 
     @Override
+    public ItemBridgeListenerPriority getPriority(){
+        return ItemBridgeListenerPriority.LOWEST;
+    }
+
+    @Override
     public ItemStack fetchItemStack(String item){
         Material m = Material.matchMaterial(item);
         return m == null ? null : new ItemStack(m);
+    }
+
+    @Override
+    public String getItemName(ItemStack stack){
+        return stack == null ? null : stack.getType().name();
+    }
+
+    @Override
+    public boolean isItem(ItemStack stack, String name){
+        return stack.getType().name().equalsIgnoreCase(name);
     }
 }

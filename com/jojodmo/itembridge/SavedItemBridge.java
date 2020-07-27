@@ -26,7 +26,12 @@ public class SavedItemBridge implements ItemBridgeListener{
         return get(item);
     }
 
+    static void reload(){
+        cached.clear();
+    }
+
     private static Map<String, ItemStack> cached = new HashMap<>();
+
     static ItemStack get(String key){
         key = key.toLowerCase();
         if(cached.containsKey(key)){
