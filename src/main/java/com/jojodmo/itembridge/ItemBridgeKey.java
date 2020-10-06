@@ -1,7 +1,5 @@
 package com.jojodmo.itembridge;
 
-import org.bukkit.plugin.Plugin;
-
 public class ItemBridgeKey{
 
     private String namespace;

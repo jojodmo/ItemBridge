@@ -1,15 +1,12 @@
 package com.jojodmo.itembridge;
 
-import com.sun.istack.internal.NotNull;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import sun.jvm.hotspot.utilities.AssertionFailure;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Level;
