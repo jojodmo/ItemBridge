@@ -1,0 +1,12 @@
+name: ItemBridge
+main: com.jojodmo.itembridge.Main
+version: "2.0"
+api-version: "1.13"
+author: jojodmo
+website: https://polymart.org/r/item-bridge.4
+
+commands:
+  itembridge:
+    description: All general ItemBridge commands
+    usage: /itembridge <get/give/save/drop/plugin>
+    aliases: [itb, ib]
