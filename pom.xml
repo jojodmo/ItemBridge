@@ -44,12 +44,6 @@
             <artifactId>annotations</artifactId>
             <version>20.1.0</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.github.jojodmo</groupId>
-            <artifactId>ItemBridge</artifactId>
-            <version>master-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>
