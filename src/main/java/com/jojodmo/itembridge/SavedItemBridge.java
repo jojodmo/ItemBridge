@@ -4,11 +4,10 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 public class SavedItemBridge implements ItemBridgeListener{
@@ -92,5 +91,15 @@ public class SavedItemBridge implements ItemBridgeListener{
 
     private static File getFile(String fileName){
         return new File(Main.that.getDataFolder().getPath() + File.separator + fileName);
+    }
+
+    @Override
+    public @NotNull List<String> getAvailableItems(){
+        File saves = new File(Main.that.getDataFolder().getPath() + File.separator + "saves");
+        List<String> ids = new ArrayList<>();
+        for(File f : saves.listFiles()){
+            ids.add(f.getName().replaceAll("\\.yml$", ""));
+        }
+        return Collections.unmodifiableList(ids);
     }
 }

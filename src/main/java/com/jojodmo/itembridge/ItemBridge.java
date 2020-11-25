@@ -1,6 +1,8 @@
 package com.jojodmo.itembridge;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -19,6 +21,7 @@ public class ItemBridge{
 
     Plugin plugin;
     String defaultKey;
+    List<String> allKeys = new ArrayList<>();
     private boolean valid = false;
     private List<ItemBridgeListener> listeners = new ArrayList<>();
 
@@ -76,6 +79,7 @@ public class ItemBridge{
         if(valid){
             this.defaultKey = added.get(0);
             instances.add(this);
+            allKeys = added;
         }
     }
 
@@ -407,6 +411,176 @@ public class ItemBridge{
         return null;
     }
 
+    /**
+     * Get the key for the block at the given location
+     * @param location the location of the block
+     * @return an ItemBridgeKey for the given item. If the given location is a vanilla Minecraft block, this will return minecraft:TYPE,
+     * where type is location.getBlock().getType().name()
+     */
+    @NotNull
+    public static ItemBridgeKey getBlock(@NotNull Location location){
+        for(ItemBridgeListenerPriority p : ItemBridgeListenerPriority.values()){
+            List<ItemBridgeListenerWrapper> list = listenersByPriority.get(p);
+            if(list != null){
+                for(ItemBridgeListenerWrapper l : list){
+                    String s = l.listener.getBlock(location);
+                    if(s != null){
+                        return new ItemBridgeKey(l.bridge, s);
+                    }
+                }
+            }
+        }
+        return new ItemBridgeKey("minecraft", location.getBlock().getType().name());
+    }
+
+    public static boolean isBlock(@NotNull Location location, @NotNull String id){
+        for(ItemBridgeListenerPriority p : ItemBridgeListenerPriority.values()){
+            List<ItemBridgeListenerWrapper> list = listenersByPriority.get(p);
+            if(list != null){
+                for(ItemBridgeListenerWrapper l : list){
+                    if(l.listener.isBlock(location, id)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isBlock(@NotNull Location location, @NotNull String id, @NotNull Map<String, Object> parameters){
+        for(ItemBridgeListenerPriority p : ItemBridgeListenerPriority.values()){
+            List<ItemBridgeListenerWrapper> list = listenersByPriority.get(p);
+            if(list != null){
+                for(ItemBridgeListenerWrapper l : list){
+                    if(l.listener.isBlock(location, id, parameters)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get the ItemBridge parameters for the block at the given location
+     * @param location the location of the block
+     * @return a Map of the parameters for the block at the given location. If the block is a vanilla block, or
+     * the block doesn't have any parameters, this will return {@code null}
+     */
+    @Nullable
+    public static Map<String, Object> getBlockParameters(@NotNull Location location){
+        for(ItemBridgeListenerPriority p : ItemBridgeListenerPriority.values()){
+            List<ItemBridgeListenerWrapper> list = listenersByPriority.get(p);
+            if(list != null){
+                for(ItemBridgeListenerWrapper l : list){
+                    Map<String, Object> params = l.listener.getBlockParameters(location);
+                    if(params != null){
+                        return params;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Remove the block at the given location
+     * @param location the location of the block
+     * @return {@code true} if the block was successfully removed, or {@code false} if not. If this function
+     * returns {@code false}, you should fall back to your own code for removing the block, likely location.getBlock().setType(Material.AIR)
+     */
+    public static boolean removeBlock(@NotNull Location location){
+        for(ItemBridgeListenerPriority p : ItemBridgeListenerPriority.values()){
+            List<ItemBridgeListenerWrapper> list = listenersByPriority.get(p);
+            if(list != null){
+                for(ItemBridgeListenerWrapper l : list){
+                    if(l.listener.removeBlock(location)){
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean setBlock(@NotNull Location location, @NotNull String key){
+        return setBlock(location, key, new HashMap<>());
+    }
+
+    public static boolean setBlock(@NotNull Location location, @NotNull String id, @Nullable Map<String, Object> parameters){
+        String[] split = id.split(":", 2);
+        if(split.length == 1){
+            return setBlock(location, "minecraft", id, parameters);
+        }
+        return setBlock(location, split[0], split[1], parameters);
+    }
+
+    public static boolean setBlock(@NotNull Location location, @NotNull ItemBridgeKey key){
+        return setBlock(location, key, null);
+    }
+
+    public static boolean setBlock(@NotNull Location location, @NotNull ItemBridgeKey key, @Nullable Map<String, Object> parameters){
+        return setBlock(location, key.getNamespace(), key.getItem(), parameters);
+    }
+
+    public static boolean setBlock(@NotNull Location location, @NotNull Plugin plugin, @NotNull String id){
+        return setBlock(location, plugin, id, null);
+    }
+
+    public static boolean setBlock(@NotNull Location location, @NotNull Plugin plugin, @NotNull String id, @Nullable Map<String, Object> parameters){
+        return setBlock(location, plugin.getName(), id, parameters);
+    }
+
+    public static boolean setBlock(@NotNull Location location, @NotNull String key, @NotNull String id){
+        return setBlock(location, key, id, null);
+    }
+
+    public static boolean setBlock(@NotNull Location location, @NotNull String key, @NotNull String id, @Nullable Map<String, Object> parameters){
+        ItemBridge instance = instanceMap.get(key.toLowerCase());
+        if(instance == null){return false;}
+
+        if(parameters == null){parameters = new HashMap<>();}
+        for(ItemBridgeListener listener : instance.listeners){
+            if(listener.setBlock(location, id, parameters)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Map<String, List<String>> getEnabledListeners(){
+        Map<String, List<String>> result = new HashMap<>();
+        for(ItemBridge ib : instances){
+            result.put(ib.defaultKey, Collections.unmodifiableList(ib.allKeys));
+        }
+
+        return result;
+    }
+
+    @Nullable
+    public List<String> getAvailableItems(@NotNull String plugin){
+        ItemBridge instance = instanceMap.get(plugin.toLowerCase());
+        if(instance == null){return null;}
+
+        List<String> available = new ArrayList<>();
+        for(ItemBridgeListener listener : instance.listeners){
+            available.addAll(listener.getAvailableItems());
+        }
+        return available;
+    }
+
+    @Nullable
+    public List<String> getAvailableBlocks(@NotNull String plugin){
+        ItemBridge instance = instanceMap.get(plugin.toLowerCase());
+        if(instance == null){return null;}
+
+        List<String> available = new ArrayList<>();
+        for(ItemBridgeListener listener : instance.listeners){
+            available.addAll(listener.getAvailableBlocks());
+        }
+        return available;
+    }
 
 
     private static class ItemBridgeListenerWrapper{

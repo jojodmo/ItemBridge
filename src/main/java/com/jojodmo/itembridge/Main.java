@@ -200,7 +200,7 @@ public class Main extends JavaPlugin{
     }
 
     private boolean sendInfo(CommandSender s){
-        sendMessage(s, "Running ItemBridge v" + getDescription().getVersion() + " by jojodmo");
+        sendMessage(s, "Running ItemBridge v" + getDescription().getVersion() + " from polymart.org by jojodmo");
         return true;
     }
 

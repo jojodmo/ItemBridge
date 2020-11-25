@@ -1,11 +1,12 @@
 package com.jojodmo.itembridge;
 
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public interface ItemBridgeListener{
 
@@ -14,6 +15,23 @@ public interface ItemBridgeListener{
      */
     default ItemBridgeListenerPriority getPriority(){
         return ItemBridgeListenerPriority.MEDIUM;
+    }
+
+    /**
+     * @return {@code} if the plugin is completely loaded. Your listener will still get calls, even if this returns false
+     */
+    default boolean isReady(){
+        return true;
+    }
+
+    @NotNull
+    default Collection<String> getAvailableItems(){
+        return new ArrayList<>();
+    }
+
+    @NotNull
+    default Collection<String> getAvailableBlocks(){
+        return new ArrayList<>();
     }
 
     /**
@@ -67,13 +85,13 @@ public interface ItemBridgeListener{
             if(current == null){return parameters.isEmpty();}
 
             for(Map.Entry<String, Object> param : parameters.entrySet()){
-                if(!Objects.equals(param.getValue(), current.get(param.getKey()))){
+                if(!Objects.deepEquals(param.getValue(), current.get(param.getKey()))){
                     return false;
                 }
             }
 
             for(Map.Entry<String, Object> param : current.entrySet()){
-                if(!Objects.equals(param.getValue(), parameters.get(param.getKey()))){
+                if(!Objects.deepEquals(param.getValue(), parameters.get(param.getKey()))){
                     return false;
                 }
             }
@@ -86,10 +104,10 @@ public interface ItemBridgeListener{
      * @param stack the ItemStack
      * @param item the name of the item
      * @return {@code true} iff this plugin added {@code stack} AND the item name of {@code stack} is the same as the item name
-     * given for {@code item}. False otherwise.
+     * given for {@code item}. {@code false} otherwise.
      */
     default boolean isItem(@NotNull ItemStack stack, @NotNull String item){
-        return item.equals(getItemName(stack));
+        return item.equalsIgnoreCase(getItemName(stack));
     }
 
     /**
@@ -100,4 +118,77 @@ public interface ItemBridgeListener{
      */
     @Nullable
     ItemStack fetchItemStack(@NotNull String item);
+
+    /**
+     * Method to set the block at the location location to the given id.
+     * This method MUST NOT change the block in any way if it returns false.
+     * @param location the location of the block
+     * @param id the ID of the block. This will never be null. Listen for removeBlock to handle the removal of blocks
+     * @return {@code true} if a block exists with the given id, and setting the block was successful. {@code false} otherwise.
+     */
+    default boolean setBlock(@NotNull Location location, @NotNull String id){
+        return false;
+    }
+
+    default boolean setBlock(@NotNull Location location, @NotNull String id, @NotNull Map<String, Object> parameters){
+        return setBlock(location, id);
+    }
+
+    /**
+     * Method to remove the block at the given location.
+     * This method MUST NOT change the block in any way if it returns false.
+     * @param location the location of the block to be removed
+     * @return {@code true} if the given block is known to be managed by this plugin, {@code false} otherwise. If it's
+     * safe to remove blocks by just setting their type to air, it's ok to always return {@code false} here. However,
+     * don't return {@code true} unless you're sure that the block removal is handled by your plugin
+     */
+    default boolean removeBlock(@NotNull Location location){
+        return false;
+    }
+
+    /**
+     * Method to fetch the id of the block at the given location.
+     * @param location the name of the item in this plugin
+     * @return {@code null} if the block at this location was not set by this plugin, or the ID of the block otherwise.
+     */
+    @Nullable
+    default String getBlock(@NotNull Location location){
+        return null;
+    }
+
+    @Nullable
+    default Map<String, Object> getBlockParameters(@NotNull Location location){
+        return null;
+    }
+
+    /**
+     * Method to check whether or not the block at {@code location} is from this plugin and it's ID is {@code id}
+     * @param location the location of block
+     * @param id the name of the block
+     * @return {@code true} iff this plugin added the block at {@code location} AND the ID of the block is {@code id}.
+     * {@code false} otherwise.
+     */
+    default boolean isBlock(@NotNull Location location, @NotNull String id){
+        return id.equalsIgnoreCase(getBlock(location));
+    }
+
+    default boolean isBlock(@NotNull Location location, @NotNull String id, @NotNull Map<String, Object> parameters){
+        if(isBlock(location, id)){
+            Map<String, Object> current = getBlockParameters(location);
+            if(current == null){return parameters.isEmpty();}
+
+            for(Map.Entry<String, Object> param : parameters.entrySet()){
+                if(!Objects.deepEquals(param.getValue(), current.get(param.getKey()))){
+                    return false;
+                }
+            }
+
+            for(Map.Entry<String, Object> param : current.entrySet()){
+                if(!Objects.deepEquals(param.getValue(), parameters.get(param.getKey()))){
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
 }
