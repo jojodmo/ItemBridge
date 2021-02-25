@@ -7,9 +7,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Main extends JavaPlugin{
+public class ItemBridgePlugin extends JavaPlugin{
 
-    static Main that;
+    static ItemBridgePlugin that;
     private static MinecraftItemBridge minecraftBridge;
     private static SavedItemBridge savedBridge;
     private static boolean isEnabled = false;
