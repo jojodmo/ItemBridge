@@ -69,7 +69,7 @@ public class SavedItemBridge implements ItemBridgeListener{
 
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         config.set("key", key);
-        config.set("ItemBridgeVersion", Main.that.getDescription().getVersion());
+        config.set("ItemBridgeVersion", ItemBridgePlugin.that.getDescription().getVersion());
         config.set("saveTime", System.currentTimeMillis());
         config.set("saveMethod", "playerCommand");
         config.set("savedBy", saver.toString());
@@ -90,12 +90,12 @@ public class SavedItemBridge implements ItemBridgeListener{
     }
 
     private static File getFile(String fileName){
-        return new File(Main.that.getDataFolder().getPath() + File.separator + fileName);
+        return new File(ItemBridgePlugin.that.getDataFolder().getPath() + File.separator + fileName);
     }
 
     @Override
     public @NotNull List<String> getAvailableItems(){
-        File saves = new File(Main.that.getDataFolder().getPath() + File.separator + "saves");
+        File saves = new File(ItemBridgePlugin.that.getDataFolder().getPath() + File.separator + "saves");
         List<String> ids = new ArrayList<>();
         for(File f : saves.listFiles()){
             ids.add(f.getName().replaceAll("\\.yml$", ""));
