@@ -18,6 +18,12 @@ public class SavedItemBridge implements ItemBridgeListener{
         this.plugin = p;
         bridge = ItemBridge.init(p, "itembridge", "saved", "save", "saves");
         bridge.registerListener(this);
+
+        if (bridge == null){
+            plugin.getLogger().log(Level.SEVERE, "Failed to initialize ItemBridge");
+        }
+
+        reload();
     }
 
     @Override
@@ -27,6 +33,23 @@ public class SavedItemBridge implements ItemBridgeListener{
 
     static void reload(){
         cached.clear();
+
+        File file = getFile("saves/");
+        if(!file.exists()){
+            if(!file.mkdirs()){
+                System.out.println("Failed to create saves folder");
+            }
+        }
+
+        for (File listFile : file.listFiles()) {
+            if (listFile.getName().endsWith(".yml")) {
+                YamlConfiguration config = YamlConfiguration.loadConfiguration(listFile);
+                ItemStack stack = config.getItemStack("item");
+                String key = config.getString("key");
+                cached.put(key.toLowerCase(), stack);
+            }
+        }
+
     }
 
     private static Map<String, ItemStack> cached = new HashMap<>();
@@ -47,6 +70,10 @@ public class SavedItemBridge implements ItemBridgeListener{
         ItemStack stack = config.getItemStack("item");
         cached.put(key, stack);
         return stack;
+    }
+
+    static List<String> cachedKeys() {
+        return new ArrayList<>(cached.keySet());
     }
 
     static boolean put(String key, ItemStack item, UUID saver){

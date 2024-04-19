@@ -280,6 +280,18 @@ public class ItemBridge{
     }
 
     /**
+     * Fetch all valid keys
+     * @return List<String> of all the valid keys
+     */
+    public static List<String> getValidKeys() {
+        ArrayList<String> list = new ArrayList<>();
+        for (String key : SavedItemBridge.cachedKeys()) {
+            list.add("saved:" + key);
+        }
+        return list;
+    }
+
+    /**
      * Fetch an ItemStack for the given String
      * @param item a String in the format PLUGIN:ITEM_NAME_HERE that represents the item from the given plugin
      * @return an ItemStack for the given String, or {@code null} if the item does not exist
