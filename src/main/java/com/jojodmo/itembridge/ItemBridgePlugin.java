@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Main extends JavaPlugin {
+public class ItemBridgePlugin extends JavaPlugin {
 
-    static Main that;
+    static ItemBridgePlugin that;
     private static MinecraftItemBridge minecraftBridge;
     private static SavedItemBridge savedBridge;
     private static boolean isEnabled = false;

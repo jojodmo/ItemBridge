@@ -2,7 +2,6 @@ package com.jojodmo.itembridge;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -265,7 +264,7 @@ public class ItemBridge{
      */
     public static ItemStack getItemStack(String key, String item, @NotNull Map<String, Object> parameters){
         if(key == null){
-            return Main.getMinecraftBridge().fetchItemStack(item);
+            return ItemBridgePlugin.getMinecraftBridge().fetchItemStack(item);
         }
 
         ItemBridge instance = instanceMap.get(key.toLowerCase());
@@ -330,7 +329,7 @@ public class ItemBridge{
      */
     public static boolean isItemStack(ItemStack stack, String key, String item, Map<String, Object> params){
         if(key == null){
-            return Main.getMinecraftBridge().isItem(stack, item);
+            return ItemBridgePlugin.getMinecraftBridge().isItem(stack, item);
         }
 
         ItemBridge instance = instanceMap.get(key.toLowerCase());
@@ -353,7 +352,7 @@ public class ItemBridge{
      */
     public static boolean isItemStack(ItemStack stack, String key, String item){
         if(key == null){
-            return Main.getMinecraftBridge().isItem(stack, item);
+            return ItemBridgePlugin.getMinecraftBridge().isItem(stack, item);
         }
 
         ItemBridge instance = instanceMap.get(key.toLowerCase());
