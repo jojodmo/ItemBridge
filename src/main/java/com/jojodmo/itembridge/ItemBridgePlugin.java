@@ -6,10 +6,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class Main extends JavaPlugin{
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-    static Main that;
+public class ItemBridgePlugin extends JavaPlugin {
+
+    static ItemBridgePlugin that;
     private static MinecraftItemBridge minecraftBridge;
     private static SavedItemBridge savedBridge;
     private static boolean isEnabled = false;
@@ -156,6 +163,111 @@ public class Main extends JavaPlugin{
             return sendInfo(sender);
         }
         return false;
+    }
+
+    @Nullable
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+        if (!command.getLabel().equalsIgnoreCase("itembridge")) {
+            return null;
+        }
+
+        if (args.length == 0) {
+            return Arrays.asList("get", "give", "name", "drop", "save", "reload", "plugin", "info");
+        }
+
+        if (args.length == 1) {
+            List<String> completions = new ArrayList<>();
+            StringUtil.copyPartialMatches(args[0], Arrays.asList("get", "give", "name", "drop", "save", "reload", "plugin", "info"), completions);
+            return completions;
+        }
+
+        if (args[0].equalsIgnoreCase("get")) {
+            if (!checkPermission(sender, "itembridge.get")) {
+                return new ArrayList<>();
+            }
+
+            if (args.length == 2) {
+                return StringUtil.copyPartialMatches(args[1], ItemBridge.getValidKeys(), new ArrayList<>());
+            }
+
+            if (args.length == 3) {
+                return Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
+            }
+        }
+
+        if (args[0].equalsIgnoreCase("give")) {
+            if (!checkPermission(sender, "itembridge.give")) {
+                return new ArrayList<>();
+            }
+
+            if (args.length == 2) {
+                List<String> names = new ArrayList<>();
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    if (sender instanceof Player && !((Player) sender).canSee(p)) {
+                        continue;
+                    }
+                    names.add(p.getName());
+                }
+
+                return StringUtil.copyPartialMatches(args[1], names, new ArrayList<>());
+            }
+
+            if (args.length == 3) {
+                return StringUtil.copyPartialMatches(args[2], ItemBridge.getValidKeys(), new ArrayList<>());
+            }
+
+            if (args.length == 4) {
+                return Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
+            }
+        }
+
+        if (args[0].equalsIgnoreCase("drop")) {
+            if (!checkPermission(sender, "itembridge.drop")) {
+                return new ArrayList<>();
+            }
+
+            if (args.length == 2) {
+                List<String> names = new ArrayList<>();
+                for (World w : Bukkit.getWorlds()) {
+                    names.add(w.getName());
+                }
+
+                return StringUtil.copyPartialMatches(args[1], names, new ArrayList<>());
+            }
+
+            if (args.length == 3) {
+                return Arrays.asList("x");
+            }
+
+            if (args.length == 4) {
+                return Arrays.asList("y");
+            }
+
+            if (args.length == 5) {
+                return Arrays.asList("z");
+            }
+
+            if (args.length == 6) {
+                return StringUtil.copyPartialMatches(args[5], ItemBridge.getValidKeys(), new ArrayList<>());
+            }
+
+            if (args.length == 7) {
+                return Arrays.asList("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
+            }
+        }
+
+        if (args[0].equalsIgnoreCase("save")) {
+            if (!checkPermission(sender, "itembridge.save")) {
+                return new ArrayList<>();
+            }
+
+            if (args.length == 2) {
+                return Arrays.asList("name");
+            }
+        }
+
+        return new ArrayList<>();
     }
 
     private boolean giveItem(CommandSender from, Player to, String name, String item, String amountStr){

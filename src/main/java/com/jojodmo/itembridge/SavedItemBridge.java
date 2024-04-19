@@ -1,6 +1,5 @@
 package com.jojodmo.itembridge;
 
-import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -18,6 +17,12 @@ public class SavedItemBridge implements ItemBridgeListener{
         this.plugin = p;
         bridge = ItemBridge.init(p, "itembridge", "saved", "save", "saves");
         bridge.registerListener(this);
+
+        if (bridge == null){
+            plugin.getLogger().log(Level.SEVERE, "Failed to initialize ItemBridge");
+        }
+
+        reload();
     }
 
     @Override
@@ -27,6 +32,23 @@ public class SavedItemBridge implements ItemBridgeListener{
 
     static void reload(){
         cached.clear();
+
+        File file = getFile("saves/");
+        if(!file.exists()){
+            if(!file.mkdirs()){
+                System.out.println("Failed to create saves folder");
+            }
+        }
+
+        for (File listFile : file.listFiles()) {
+            if (listFile.getName().endsWith(".yml")) {
+                YamlConfiguration config = YamlConfiguration.loadConfiguration(listFile);
+                ItemStack stack = config.getItemStack("item");
+                String key = config.getString("key");
+                cached.put(key.toLowerCase(), stack);
+            }
+        }
+
     }
 
     private static Map<String, ItemStack> cached = new HashMap<>();
@@ -49,6 +71,10 @@ public class SavedItemBridge implements ItemBridgeListener{
         return stack;
     }
 
+    static List<String> cachedKeys() {
+        return new ArrayList<>(cached.keySet());
+    }
+
     static boolean put(String key, ItemStack item, UUID saver){
         File folder = getFile("saves");
         if(!folder.exists()){
@@ -69,7 +95,7 @@ public class SavedItemBridge implements ItemBridgeListener{
 
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
         config.set("key", key);
-        config.set("ItemBridgeVersion", Main.that.getDescription().getVersion());
+        config.set("ItemBridgeVersion", ItemBridgePlugin.that.getDescription().getVersion());
         config.set("saveTime", System.currentTimeMillis());
         config.set("saveMethod", "playerCommand");
         config.set("savedBy", saver.toString());
@@ -90,12 +116,12 @@ public class SavedItemBridge implements ItemBridgeListener{
     }
 
     private static File getFile(String fileName){
-        return new File(Main.that.getDataFolder().getPath() + File.separator + fileName);
+        return new File(ItemBridgePlugin.that.getDataFolder().getPath() + File.separator + fileName);
     }
 
     @Override
     public @NotNull List<String> getAvailableItems(){
-        File saves = new File(Main.that.getDataFolder().getPath() + File.separator + "saves");
+        File saves = new File(ItemBridgePlugin.that.getDataFolder().getPath() + File.separator + "saves");
         List<String> ids = new ArrayList<>();
         for(File f : saves.listFiles()){
             ids.add(f.getName().replaceAll("\\.yml$", ""));
